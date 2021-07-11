@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="lyric1"
+            type="String" />
+
+        <variable
+            name="lyric2"
+            type="String" />
+        
+        <variable
+            name="lyric1playing"
+            type="Boolean" />
+
+        <variable
+            name="lyric2playing"
+            type="Boolean" />
+
+        <import type="android.graphics.Typeface" />
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{lyric1}"
+            android:typeface="@{Typeface.defaultFromStyle(lyric1playing ? Typeface.BOLD : Typeface.NORMAL)}"
+            android:textSize="16sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            tools:text="채워줄게 가득히 one shots"
+            tools:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/tv_singer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{lyric2}"
+            android:typeface="@{Typeface.defaultFromStyle(lyric2playing ? Typeface.BOLD : Typeface.NORMAL)}"
+            android:textSize="16sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            tools:text="잔을 위로 come on 머리 위로 come on" />
+    </LinearLayout>
+</layout>
