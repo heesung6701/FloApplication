@@ -1,11 +1,11 @@
-package com.quokkaman.floapplication.network
+package com.quokkaman.floapplication.request
 
 import com.quokkaman.floapplication.dto.SongDTO
-import retrofit2.Call
+import io.reactivex.Single
 import retrofit2.http.GET
 
 interface RetrofitService {
 
     @GET("/2020-flo/song.json")
-    fun getSong() : Call<SongDTO>
+    fun getSong() : Single<SongDTO>
 }
