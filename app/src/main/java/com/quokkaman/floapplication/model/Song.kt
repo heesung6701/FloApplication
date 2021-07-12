@@ -7,10 +7,5 @@ data class Song(
     val duration: Int,
     val fileUrl: String,
     val imageUrl: String,
-    val lines: List<Line>
-)
-
-data class Line(
-    val time: Long,
-    val lyrics: String
+    val lyricLineList: List<LyricLine>
 )
