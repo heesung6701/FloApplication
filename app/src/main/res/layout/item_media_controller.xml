@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="play"
+            type="Boolean" />
+
+        <variable
+            name="repeat"
+            type="Boolean" />
+
+        <variable
+            name="shuffle"
+            type="Boolean" />
+
+        <variable
+            name="controllerOnClick"
+            type="android.view.View.OnClickListener" />
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <ImageButton
+            android:id="@+id/repeat_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="@{controllerOnClick}"
+            android:src="@{repeat ? @drawable/ic_baseline_repeat_24 : @drawable/ic_baseline_repeat_one_24}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/prev_btn"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:src="@drawable/ic_baseline_repeat_24" />
+
+        <ImageButton
+            android:id="@+id/prev_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="@{controllerOnClick}"
+            android:src="@drawable/ic_baseline_skip_previous_24"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/play_btn"
+            app:layout_constraintStart_toEndOf="@id/repeat_btn" />
+
+        <ImageButton
+            android:id="@+id/play_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="@{controllerOnClick}"
+            android:src="@{play ? @drawable/ic_baseline_pause_24 : @drawable/ic_baseline_play_arrow_24}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/next_btn"
+            app:layout_constraintStart_toEndOf="@id/prev_btn"
+            tools:src="@drawable/ic_baseline_play_arrow_24" />
+
+        <ImageButton
+            android:id="@+id/next_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="@{controllerOnClick}"
+            android:src="@drawable/ic_baseline_skip_next_24"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/shuffle_btn"
+            app:layout_constraintStart_toEndOf="@id/play_btn" />
+
+        <ImageButton
+            android:id="@+id/shuffle_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="@{controllerOnClick}"
+            android:src="@drawable/ic_baseline_shuffle_24"
+            app:active="@{shuffle}"
+            app:activeColor="@{@color/btn_active}"
+            app:inactiveColor="@{@color/btn_inactive}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/list_btn"
+            app:layout_constraintStart_toEndOf="@id/next_btn" />
+
+        <ImageButton
+            android:id="@+id/list_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="@{controllerOnClick}"
+            android:src="@drawable/ic_baseline_list_24"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/shuffle_btn" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
