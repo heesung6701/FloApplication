@@ -1,18 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <data>
+
+        <variable
+            name="musicInfoViewModel"
+            type="com.quokkaman.floapplication.viewmodel.MusicInfoViewModel" />
+
+        <variable
+            name="musicLyricViewModel"
+            type="com.quokkaman.floapplication.viewmodel.MusicLyricViewModel" />
+
+        <variable
+            name="seekbarViewModel"
+            type="com.quokkaman.floapplication.viewmodel.SeekbarViewModel" />
+
+        <variable
+            name="mediaControllerViewModel"
+            type="com.quokkaman.floapplication.viewmodel.MediaControllerViewModel" />
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <include
+            layout="@layout/item_music_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16sp"
+            app:title="@{musicInfoViewModel.titleLiveData}"
+            app:singer="@{musicInfoViewModel.singerLiveData}"
+            app:singerOnClick="@{musicInfoViewModel::onClick}"
+            />
+
+        <ImageView
+            android:layout_width="300dp"
+            android:layout_height="300dp"
+            android:scaleType="fitXY"
+            app:imageUrl="@{musicInfoViewModel.imageLiveData}"
+            app:error="@{@drawable/splash}"
+            tools:src="@drawable/splash"
+            android:contentDescription="album" />
+
+        <include
+            layout="@layout/item_music_lyric"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_marginTop="8dp"
+            app:lyric1="@{musicLyricViewModel.lyric1}"
+            app:lyric1playing="@{musicLyricViewModel.lyric1playing}"
+            app:lyric2="@{musicLyricViewModel.lyric2}"
+            app:lyric2playing="@{musicLyricViewModel.lyric2playing}"
+            />
+
+        <include
+            layout="@layout/item_seekbar"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_margin="8dp"
+            app:playSecond="@{seekbarViewModel.playSecond}"
+            app:totalSecond="@{seekbarViewModel.totalSecond}"
+            />
+
+        <include
+            layout="@layout/item_media_controller"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_marginTop="8dp"
+            app:play="@{mediaControllerViewModel.play}"
+            app:repeat="@{mediaControllerViewModel.repeat}"
+            app:shuffle="@{mediaControllerViewModel.shuffle}"
+            app:controllerOnClick="@{mediaControllerViewModel.onClick}"
+            />
+    </LinearLayout>
+</layout>
