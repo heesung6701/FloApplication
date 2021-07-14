@@ -6,16 +6,9 @@
     <data>
 
         <variable
-            name="title"
-            type="String" />
+            name="viewmodel"
+            type="com.quokkaman.floapplication.viewmodel.MusicInfoViewModel" />
 
-        <variable
-            name="singer"
-            type="String" />
-
-        <variable
-            name="singerOnClick"
-            type="android.view.View.OnClickListener" />
     </data>
 
     <LinearLayout
@@ -27,7 +20,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@{title}"
+            android:text="@{viewmodel.titleLiveData}"
             android:textSize="24sp"
             android:textStyle="bold"
             tools:text="Good Life" />
@@ -36,8 +29,8 @@
             android:id="@+id/tv_singer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="@{singerOnClick}"
-            android:text="@{singer}"
+            android:onClick="@{viewmodel::onClick}"
+            android:text="@{viewmodel.singerLiveData}"
             android:textSize="18sp"
             app:drawableEndCompat="@drawable/ic_baseline_navigate_next_24"
             tools:text="드렁큰 타이거" />

@@ -14,7 +14,8 @@ class MusicInfoViewModel : ViewModel() {
 
     val titleLiveData: LiveData<String> = Transformations.map(songLiveData) { song -> song.title }
     val singerLiveData: LiveData<String> = Transformations.map(songLiveData) { song -> song.singer }
-    val imageLiveData: LiveData<String> = Transformations.map(songLiveData) { song -> song.imageUrl }
+    val imageLiveData: LiveData<String> =
+        Transformations.map(songLiveData) { song -> song.imageUrl }
 
     fun update(song: Song) {
         songLiveData.value = song

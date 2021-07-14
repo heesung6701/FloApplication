@@ -6,11 +6,11 @@ import com.quokkaman.floapplication.model.LyricLine
 
 
 // TODO Use RecyclerView
-class MusicLyricViewModel: ViewModel() {
-    val lyric1 = MutableLiveData<String>()
-    val lyric1playing = MutableLiveData<Boolean>()
-    val lyric2 = MutableLiveData<String>()
-    val lyric2playing = MutableLiveData<Boolean>()
+class MusicLyricViewModel : ViewModel() {
+    val lyric1LiveData = MutableLiveData<String>()
+    val lyric1playingLiveData = MutableLiveData<Boolean>()
+    val lyric2LiveData = MutableLiveData<String>()
+    val lyric2playingLiveData = MutableLiveData<Boolean>()
 
     private val lyricLineList = ArrayList<LyricLine>()
     private var position = 0
@@ -32,9 +32,11 @@ class MusicLyricViewModel: ViewModel() {
             position++
         }
         position -= 1
-        lyric1.value = lyricLineList[position].lyrics
-        lyric1playing.value = milliSecond in lyricLineList[position].millisecond until lyricLineList[position+1].millisecond
-        lyric2.value = lyricLineList[position + 1].lyrics
-        lyric2playing.value = milliSecond in lyricLineList[position + 1].millisecond until lyricLineList[position+2].millisecond
+        lyric1LiveData.value = lyricLineList[position].lyrics
+        lyric1playingLiveData.value =
+            msec in lyricLineList[position].msec until lyricLineList[position + 1].msec
+        lyric2LiveData.value = lyricLineList[position + 1].lyrics
+        lyric2playingLiveData.value =
+            msec in lyricLineList[position + 1].msec until lyricLineList[position + 2].msec
     }
 }
