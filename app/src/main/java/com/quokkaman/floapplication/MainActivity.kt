@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.quokkaman.floapplication.databinding.ActivityMainBinding
@@ -22,8 +23,9 @@ import io.reactivex.schedulers.Schedulers
 class MainActivity : AppCompatActivity() {
 
     companion object {
-        const val MESSAGE_WHAT_SECOND = 1
-        const val MESSAGE_WHAT_MILLISECOND = 2
+        const val MESSAGE_WHAT_MILLISECOND = 1
+
+        const val KEY_MSEC = "millisecond"
     }
 
     private lateinit var binding: ActivityMainBinding
@@ -38,17 +40,17 @@ class MainActivity : AppCompatActivity() {
     private val mediaPlayer = MediaPlayer()
 
     private var isPlaying = false
+    private var draggingSeekbar = false
 
     private val handler = object : Handler(Looper.getMainLooper()) {
         override fun handleMessage(msg: Message) {
             when (msg.what) {
                 MESSAGE_WHAT_MILLISECOND -> {
-                    val playMillisecond : Int = msg.data.getInt("millisecond")
-                    musicLyricViewModel.updateSecond(playMillisecond)
-                }
-                MESSAGE_WHAT_SECOND -> {
-                    val playSecond : Int = msg.data.getInt("second")
-                    seekbarViewModel.playSecond.value = playSecond
+                    val playMillisecond: Int = msg.data.getInt(KEY_MSEC)
+                    musicLyricViewModel.update(playMillisecond)
+                    if (!draggingSeekbar) {
+                        seekbarViewModel.update(playMillisecond)
+                    }
                 }
             }
         }
@@ -63,7 +65,10 @@ class MainActivity : AppCompatActivity() {
         musicInfoViewModel = ViewModelProvider(this).get(MusicInfoViewModel::class.java)
         musicLyricViewModel = ViewModelProvider(this).get(MusicLyricViewModel::class.java)
         seekbarViewModel = ViewModelProvider(this).get(SeekbarViewModel::class.java)
-        mediaControllerViewModel = ViewModelProvider(this).get(MediaControllerViewModel::class.java)
+        mediaControllerViewModel =
+            ViewModelProvider(this).get(MediaControllerViewModel::class.java).apply {
+                mediaPlayer = this@MainActivity.mediaPlayer
+            }
 
         binding.musicInfoViewModel = musicInfoViewModel
         binding.musicLyricViewModel = musicLyricViewModel
@@ -72,16 +77,31 @@ class MainActivity : AppCompatActivity() {
         binding.lifecycleOwner = this
 
         fetchMusicInfo()
-
-        mediaControllerViewModel.play.observe(this, {
+        mediaControllerViewModel.playingLiveData.observe(this, {
+            if (isPlaying == it) return@observe
             isPlaying = it
-            if(isPlaying) {
-                mediaPlayer.start()
-            } else {
-                mediaPlayer.pause()
+            if (isPlaying) {
+                MusicThread().start()
             }
         })
-        seekbarThread.start()
+        binding.itemSeekbar.seekbar.setOnSeekBarChangeListener(object :
+            SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
+                p0?.progress = p1
+            }
+
+            override fun onStartTrackingTouch(p0: SeekBar?) {
+                draggingSeekbar = true
+            }
+
+            override fun onStopTrackingTouch(p0: SeekBar?) {
+                draggingSeekbar = false
+                val seekBar = p0 ?: return
+                mediaPlayer.seekTo(seekBar.progress)
+                mediaControllerViewModel.play()
+            }
+
+        })
     }
 
     private fun fetchMusicInfo() {
@@ -99,7 +119,7 @@ class MainActivity : AppCompatActivity() {
                         seekbarViewModel.durationLiveData.value = duration
                         musicLyricViewModel.updateLyricLine(song.lyricLineList, duration)
 
-                        mediaControllerViewModel.play.value = true
+                        mediaControllerViewModel.play()
                     }
 
                     override fun onError(e: Throwable?) {
