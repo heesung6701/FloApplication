@@ -85,8 +85,8 @@ class SongRepositoryTest {
                     Pair(timeToLong(2, 57, 900), "we wish you a merry christmas"),
                     Pair(timeToLong(3, 0, 500), "and a happy new year")
                 )
-                song.lines.forEachIndexed { index, line ->
-                    assertThat(line.time, Is(list[index].first))
+                song.lyricLineList.forEachIndexed { index, line ->
+                    assertThat(line.millisecond, Is(list[index].first))
                     assertThat(line.lyrics, Is(list[index].second))
                 }
                 signal.countDown()
