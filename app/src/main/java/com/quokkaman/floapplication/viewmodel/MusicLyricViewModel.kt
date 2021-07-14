@@ -15,7 +15,7 @@ class MusicLyricViewModel : ViewModel() {
     private val lyricLineList = ArrayList<LyricLine>()
     private var position = 0
 
-    fun updateLyricLine(list : List<LyricLine>, duration: Int) {
+    fun updateLyricLine(list: List<LyricLine>, duration: Int) {
         lyricLineList.clear()
         lyricLineList.add(LyricLine(-1, ""))
         lyricLineList.add(LyricLine(-1, ""))
@@ -24,11 +24,11 @@ class MusicLyricViewModel : ViewModel() {
         lyricLineList.add(LyricLine(duration + 1, ""))
     }
 
-    fun updateSecond(milliSecond: Int) {
-        while(position > 0 && milliSecond < lyricLineList[position].millisecond) {
+    fun update(msec: Int) {
+        while (position > 0 && msec < lyricLineList[position].msec) {
             position--
         }
-        while(position < lyricLineList.size && lyricLineList[position].millisecond < milliSecond) {
+        while (position < lyricLineList.size && lyricLineList[position].msec < msec) {
             position++
         }
         position -= 1

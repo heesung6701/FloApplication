@@ -1,6 +1,5 @@
 package com.quokkaman.floapplication.repository
 
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.core.IsNull
@@ -86,7 +85,7 @@ class SongRepositoryTest {
                     Pair(timeToLong(3, 0, 500), "and a happy new year")
                 )
                 song.lyricLineList.forEachIndexed { index, line ->
-                    assertThat(line.millisecond, Is(list[index].first))
+                    assertThat(line.msec, Is(list[index].first))
                     assertThat(line.lyrics, Is(list[index].second))
                 }
                 signal.countDown()

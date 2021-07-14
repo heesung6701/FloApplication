@@ -38,11 +38,11 @@
         <ImageView
             android:layout_width="300dp"
             android:layout_height="300dp"
+            android:contentDescription="album"
             android:scaleType="fitXY"
-            app:imageUrl="@{musicInfoViewModel.imageLiveData}"
             app:error="@{@drawable/splash}"
-            tools:src="@drawable/splash"
-            android:contentDescription="album" />
+            app:imageUrl="@{musicInfoViewModel.imageLiveData}"
+            tools:src="@drawable/splash" />
 
         <include
             layout="@layout/item_music_lyric"
@@ -52,23 +52,18 @@
             app:viewmodel="@{musicLyricViewModel}" />
 
         <include
+            android:id="@+id/item_seekbar"
             layout="@layout/item_seekbar"
-            android:layout_height="wrap_content"
             android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            app:playSecond="@{seekbarViewModel.playSecond}"
-            app:totalSecond="@{seekbarViewModel.totalSecond}"
-            />
+            app:viewmodel="@{seekbarViewModel}" />
 
         <include
             layout="@layout/item_media_controller"
-            android:layout_height="wrap_content"
             android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            app:play="@{mediaControllerViewModel.play}"
-            app:repeat="@{mediaControllerViewModel.repeat}"
-            app:shuffle="@{mediaControllerViewModel.shuffle}"
-            app:controllerOnClick="@{mediaControllerViewModel.onClick}"
-            />
+            app:viewmodel="@{mediaControllerViewModel}" />
     </LinearLayout>
 </layout>

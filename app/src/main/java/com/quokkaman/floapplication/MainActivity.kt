@@ -30,18 +30,18 @@ class MainActivity : AppCompatActivity() {
 
     private val songRepository = SongRepository
     private val disposable = CompositeDisposable()
-    private lateinit var musicInfoViewModel : MusicInfoViewModel
-    private lateinit var musicLyricViewModel : MusicLyricViewModel
-    private lateinit var seekbarViewModel : SeekbarViewModel
-    private lateinit var mediaControllerViewModel : MediaControllerViewModel
+    private lateinit var musicInfoViewModel: MusicInfoViewModel
+    private lateinit var musicLyricViewModel: MusicLyricViewModel
+    private lateinit var seekbarViewModel: SeekbarViewModel
+    private lateinit var mediaControllerViewModel: MediaControllerViewModel
 
     private val mediaPlayer = MediaPlayer()
 
     private var isPlaying = false
 
-    private val handler = object: Handler(Looper.getMainLooper()) {
+    private val handler = object : Handler(Looper.getMainLooper()) {
         override fun handleMessage(msg: Message) {
-            when(msg.what) {
+            when (msg.what) {
                 MESSAGE_WHAT_MILLISECOND -> {
                     val playMillisecond : Int = msg.data.getInt("millisecond")
                     musicLyricViewModel.updateSecond(playMillisecond)
@@ -120,7 +120,7 @@ class MainActivity : AppCompatActivity() {
                         mediaPlayer.setDataSource(t.file)
                         mediaPlayer.prepare()
                         val duration = mediaPlayer.duration
-                        seekbarViewModel.totalSecond.value = duration / 1000
+                        seekbarViewModel.durationLiveData.value = duration
                         musicLyricViewModel.updateLyricLine(song.lyricLineList, duration)
 
                         mediaControllerViewModel.play.value = true
