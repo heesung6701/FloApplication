@@ -54,30 +54,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    var recentSecond = -1
-    var recentMillisecond = -1
-    private val seekbarThread = object: Thread() {
-        override fun run() {
-            while(true) {
-                if(mediaPlayer.isPlaying) {
-                    val millisecond = mediaPlayer.currentPosition
-                    if (recentMillisecond == millisecond) continue
-                    recentMillisecond = millisecond
-                    handler.sendMessage(Message().apply {
-                        what = MESSAGE_WHAT_MILLISECOND
-                        data.putInt("millisecond", millisecond)
-                    })
-                    val second = millisecond / 1000
-                    if (second == recentSecond) continue
-                    recentSecond = second
-                    handler.sendMessage(Message().apply {
-                        what = MESSAGE_WHAT_SECOND
-                        data.putInt("second", second)
-                    })
-                }
-            }
-        }
-    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -135,9 +111,25 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        disposable.clear()
         mediaPlayer.stop()
         isPlaying = false
-        seekbarThread.interrupt()
+        disposable.clear()
+    }
+
+    inner class MusicThread : Thread() {
+
+        var recent = -1
+
+        override fun run() {
+            while (isPlaying) {
+                val msec = mediaPlayer.currentPosition
+                if (recent == msec) continue
+                recent = msec
+                handler.sendMessage(Message().apply {
+                    what = MESSAGE_WHAT_MILLISECOND
+                    data.putInt(KEY_MSEC, msec)
+                })
+            }
+        }
     }
 }
