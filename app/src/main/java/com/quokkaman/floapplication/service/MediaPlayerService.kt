@@ -131,9 +131,7 @@ class MediaPlayerService : Service(), MediaPlayer.OnPreparedListener {
 
     private fun seekTo(msec: Int) {
         mMediaPlayer?.let {
-            if (!it.isPlaying) {
-                it.seekTo(msec)
-            }
+            it.seekTo(msec)
         }
     }
 
