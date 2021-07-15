@@ -1,4 +1,4 @@
-package com.quokkaman.floapplication
+package com.quokkaman.floapplication.player
 
 import android.media.MediaPlayer
 import android.os.Bundle
@@ -8,7 +8,7 @@ import android.os.Message
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
-import com.quokkaman.floapplication.databinding.ActivityMainBinding
+import com.quokkaman.floapplication.databinding.ActivityPlayerBinding
 import com.quokkaman.floapplication.dto.SongDTO
 import com.quokkaman.floapplication.repository.SongRepository
 import com.quokkaman.floapplication.viewmodel.MediaControllerViewModel
@@ -20,7 +20,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.DisposableSingleObserver
 import io.reactivex.schedulers.Schedulers
 
-class MainActivity : AppCompatActivity() {
+class PlayerActivity : AppCompatActivity() {
 
     companion object {
         const val MESSAGE_WHAT_MILLISECOND = 1
@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
         const val KEY_MSEC = "millisecond"
     }
 
-    private lateinit var binding: ActivityMainBinding
+    private lateinit var binding: ActivityPlayerBinding
 
     private val songRepository = SongRepository
     private val disposable = CompositeDisposable()
@@ -59,7 +59,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        binding = ActivityMainBinding.inflate(layoutInflater)
+        binding = ActivityPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         musicInfoViewModel = ViewModelProvider(this).get(MusicInfoViewModel::class.java)
@@ -67,7 +67,7 @@ class MainActivity : AppCompatActivity() {
         seekbarViewModel = ViewModelProvider(this).get(SeekbarViewModel::class.java)
         mediaControllerViewModel =
             ViewModelProvider(this).get(MediaControllerViewModel::class.java).apply {
-                mediaPlayer = this@MainActivity.mediaPlayer
+                mediaPlayer = this@PlayerActivity.mediaPlayer
             }
 
         binding.musicInfoViewModel = musicInfoViewModel
