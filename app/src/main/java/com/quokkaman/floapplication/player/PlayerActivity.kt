@@ -1,27 +1,34 @@
 package com.quokkaman.floapplication.player
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
-import android.media.MediaPlayer
+import android.content.IntentFilter
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import android.util.Log
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.quokkaman.floapplication.databinding.ActivityPlayerBinding
 import com.quokkaman.floapplication.dto.SongDTO
 import com.quokkaman.floapplication.lyric.LyricActivity
 import com.quokkaman.floapplication.model.Song
+import com.quokkaman.floapplication.player.viewmodel.MusicInfoViewModel
+import com.quokkaman.floapplication.player.viewmodel.MusicLyricViewModel
 import com.quokkaman.floapplication.repository.SongRepository
+import com.quokkaman.floapplication.service.MediaPlayerService
 import com.quokkaman.floapplication.viewmodel.MediaControllerViewModel
-import com.quokkaman.floapplication.viewmodel.MusicInfoViewModel
-import com.quokkaman.floapplication.viewmodel.MusicLyricViewModel
 import com.quokkaman.floapplication.viewmodel.SeekbarViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.DisposableSingleObserver
 import io.reactivex.schedulers.Schedulers
+import java.lang.Exception
+
 
 class PlayerActivity : AppCompatActivity() {
 
@@ -40,21 +47,47 @@ class PlayerActivity : AppCompatActivity() {
     private lateinit var seekbarViewModel: SeekbarViewModel
     private lateinit var mediaControllerViewModel: MediaControllerViewModel
 
-    private val mediaPlayer = MediaPlayer()
-
-    private var isPlaying = false
     private var draggingSeekbar = false
-    private var fetchedSong : Song? = null
+    private var fetchedSong: Song? = null
 
     private val handler = object : Handler(Looper.getMainLooper()) {
         override fun handleMessage(msg: Message) {
             when (msg.what) {
                 MESSAGE_WHAT_MILLISECOND -> {
                     val playMillisecond: Int = msg.data.getInt(KEY_MSEC)
+                    Log.d("HSSS2", "msec" + playMillisecond)
                     musicLyricViewModel.update(playMillisecond)
                     if (!draggingSeekbar) {
                         seekbarViewModel.update(playMillisecond)
                     }
+                }
+            }
+        }
+    }
+
+    private val mMessageReceiver = object : BroadcastReceiver() {
+        override fun onReceive(p0: Context?, p1: Intent?) {
+            val intent = p1?:return
+            when(intent.action) {
+                MediaPlayerService.EVENT_MSEC -> {
+                    val msec = intent.getIntExtra(MediaPlayerService.MESSAGE_MSEC, 0)
+                    Log.d("HSSS", "msec" + msec)
+                    handler.sendMessage(Message().apply {
+                        what = MESSAGE_WHAT_MILLISECOND
+                        data.putInt(KEY_MSEC, msec)
+                    })
+                }
+                MediaPlayerService.EVENT_SET_SOURCE -> {
+                    val duration = intent.getIntExtra(MediaPlayerService.MESSAGE_DURATION, 0)
+                    Log.d("HSSS", "duration" + duration)
+                    mediaControllerViewModel.play()
+                    seekbarViewModel.durationLiveData.value = duration
+                    fetchedSong?.let {
+                        musicLyricViewModel.updateLyricLine(it.lyricLineList, duration)
+                    }
+                }
+                else ->{
+                    throw Exception(intent.action+"")
                 }
             }
         }
@@ -70,9 +103,7 @@ class PlayerActivity : AppCompatActivity() {
         musicLyricViewModel = ViewModelProvider(this).get(MusicLyricViewModel::class.java)
         seekbarViewModel = ViewModelProvider(this).get(SeekbarViewModel::class.java)
         mediaControllerViewModel =
-            ViewModelProvider(this).get(MediaControllerViewModel::class.java).apply {
-                mediaPlayer = this@PlayerActivity.mediaPlayer
-            }
+            ViewModelProvider(this).get(MediaControllerViewModel::class.java)
 
         binding.musicInfoViewModel = musicInfoViewModel
         binding.musicLyricViewModel = musicLyricViewModel
@@ -82,10 +113,14 @@ class PlayerActivity : AppCompatActivity() {
 
         fetchMusicInfo()
         mediaControllerViewModel.playingLiveData.observe(this, {
-            if (isPlaying == it) return@observe
-            isPlaying = it
-            if (isPlaying) {
-                MusicThread().start()
+            if(it) {
+                startService(Intent(applicationContext, MediaPlayerService::class.java).apply {
+                    action = MediaPlayerService.ACTION_PLAY
+                })
+            } else {
+                startService(Intent(applicationContext, MediaPlayerService::class.java).apply {
+                    action = MediaPlayerService.ACTION_PAUSE
+                })
             }
         })
         binding.itemSeekbar.seekbar.setOnSeekBarChangeListener(object :
@@ -101,11 +136,19 @@ class PlayerActivity : AppCompatActivity() {
             override fun onStopTrackingTouch(p0: SeekBar?) {
                 draggingSeekbar = false
                 val seekBar = p0 ?: return
-                mediaPlayer.seekTo(seekBar.progress)
+                startService(Intent(applicationContext, MediaPlayerService::class.java).apply {
+                    action = MediaPlayerService.ACTION_SEEKTO
+                    putExtra(MediaPlayerService.MESSAGE_MSEC, seekBar.progress)
+                })
                 mediaControllerViewModel.play()
             }
 
         })
+
+        binding.itemLyric.root.setOnClickListener {
+            val intent = Intent(this, LyricActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun fetchMusicInfo() {
@@ -118,13 +161,15 @@ class PlayerActivity : AppCompatActivity() {
                         val song = t?.toModel() ?: return
                         fetchedSong = song
                         musicInfoViewModel.update(song)
-                        mediaPlayer.setDataSource(t.file)
-                        mediaPlayer.prepare()
-                        val duration = mediaPlayer.duration
-                        seekbarViewModel.durationLiveData.value = duration
-                        musicLyricViewModel.updateLyricLine(song.lyricLineList, duration)
 
-                        mediaControllerViewModel.play()
+                        startService(
+                            Intent(
+                                applicationContext,
+                                MediaPlayerService::class.java
+                            ).apply {
+                                action = MediaPlayerService.ACTION_SET
+                                putExtra("media", t.file)
+                            })
                     }
 
                     override fun onError(e: Throwable?) {
@@ -136,38 +181,24 @@ class PlayerActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        fetchedSong?.let {
-            isPlaying = true
-            MusicThread().start()
-        }
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+            mMessageReceiver, IntentFilter().apply {
+                addAction(MediaPlayerService.EVENT_MSEC)
+                addAction(MediaPlayerService.EVENT_SET_SOURCE)
+            }
+        )
     }
 
     override fun onPause() {
         super.onPause()
-        isPlaying = false
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        mediaPlayer.stop()
-        isPlaying = false
+        startService(Intent(applicationContext, MediaPlayerService::class.java).apply {
+            action = MediaPlayerService.ACTION_RELEASE
+        })
         disposable.clear()
-    }
-
-    inner class MusicThread : Thread() {
-
-        var recent = -1
-
-        override fun run() {
-            while (isPlaying) {
-                val msec = mediaPlayer.currentPosition
-                if (recent == msec) continue
-                recent = msec
-                handler.sendMessage(Message().apply {
-                    what = MESSAGE_WHAT_MILLISECOND
-                    data.putInt(KEY_MSEC, msec)
-                })
-            }
-        }
     }
 }
