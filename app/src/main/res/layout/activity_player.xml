@@ -46,6 +46,7 @@
             tools:src="@drawable/splash" />
 
         <include
+            android:id="@+id/item_lyric"
             layout="@layout/item_music_lyric"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

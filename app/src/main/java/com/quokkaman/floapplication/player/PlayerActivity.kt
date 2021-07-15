@@ -1,5 +1,6 @@
 package com.quokkaman.floapplication.player
 
+import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
@@ -10,6 +11,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.quokkaman.floapplication.databinding.ActivityPlayerBinding
 import com.quokkaman.floapplication.dto.SongDTO
+import com.quokkaman.floapplication.lyric.LyricActivity
+import com.quokkaman.floapplication.model.Song
 import com.quokkaman.floapplication.repository.SongRepository
 import com.quokkaman.floapplication.viewmodel.MediaControllerViewModel
 import com.quokkaman.floapplication.viewmodel.MusicInfoViewModel
@@ -41,6 +44,7 @@ class PlayerActivity : AppCompatActivity() {
 
     private var isPlaying = false
     private var draggingSeekbar = false
+    private var fetchedSong : Song? = null
 
     private val handler = object : Handler(Looper.getMainLooper()) {
         override fun handleMessage(msg: Message) {
@@ -112,6 +116,7 @@ class PlayerActivity : AppCompatActivity() {
                 .subscribeWith(object : DisposableSingleObserver<SongDTO>() {
                     override fun onSuccess(t: SongDTO?) {
                         val song = t?.toModel() ?: return
+                        fetchedSong = song
                         musicInfoViewModel.update(song)
                         mediaPlayer.setDataSource(t.file)
                         mediaPlayer.prepare()
@@ -127,6 +132,19 @@ class PlayerActivity : AppCompatActivity() {
                     }
                 })
         )
+    }
+
+    override fun onResume() {
+        super.onResume()
+        fetchedSong?.let {
+            isPlaying = true
+            MusicThread().start()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        isPlaying = false
     }
 
     override fun onDestroy() {
