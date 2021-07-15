@@ -32,12 +32,6 @@ import java.lang.Exception
 
 class PlayerActivity : AppCompatActivity() {
 
-    companion object {
-        const val MESSAGE_WHAT_MILLISECOND = 1
-
-        const val KEY_MSEC = "millisecond"
-    }
-
     private lateinit var binding: ActivityPlayerBinding
 
     private val songRepository = SongRepository
@@ -50,36 +44,19 @@ class PlayerActivity : AppCompatActivity() {
     private var draggingSeekbar = false
     private var fetchedSong: Song? = null
 
-    private val handler = object : Handler(Looper.getMainLooper()) {
-        override fun handleMessage(msg: Message) {
-            when (msg.what) {
-                MESSAGE_WHAT_MILLISECOND -> {
-                    val playMillisecond: Int = msg.data.getInt(KEY_MSEC)
-                    Log.d("HSSS2", "msec" + playMillisecond)
-                    musicLyricViewModel.update(playMillisecond)
-                    if (!draggingSeekbar) {
-                        seekbarViewModel.update(playMillisecond)
-                    }
-                }
-            }
-        }
-    }
-
     private val mMessageReceiver = object : BroadcastReceiver() {
         override fun onReceive(p0: Context?, p1: Intent?) {
             val intent = p1?:return
             when(intent.action) {
                 MediaPlayerService.EVENT_MSEC -> {
                     val msec = intent.getIntExtra(MediaPlayerService.MESSAGE_MSEC, 0)
-                    Log.d("HSSS", "msec" + msec)
-                    handler.sendMessage(Message().apply {
-                        what = MESSAGE_WHAT_MILLISECOND
-                        data.putInt(KEY_MSEC, msec)
-                    })
+                    musicLyricViewModel.update(msec)
+                    if (!draggingSeekbar) {
+                        seekbarViewModel.update(msec)
+                    }
                 }
                 MediaPlayerService.EVENT_SET_SOURCE -> {
                     val duration = intent.getIntExtra(MediaPlayerService.MESSAGE_DURATION, 0)
-                    Log.d("HSSS", "duration" + duration)
                     mediaControllerViewModel.play()
                     seekbarViewModel.durationLiveData.value = duration
                     fetchedSong?.let {
