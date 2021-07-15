@@ -1,4 +1,4 @@
-package com.quokkaman.floapplication
+package com.quokkaman.floapplication.splash
 
 import android.content.Intent
 import android.os.Bundle
@@ -6,6 +6,7 @@ import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import com.quokkaman.floapplication.databinding.ActivitySplashBinding
+import com.quokkaman.floapplication.player.PlayerActivity
 
 class SplashActivity : AppCompatActivity() {
 
@@ -21,7 +22,7 @@ class SplashActivity : AppCompatActivity() {
 
         handler = Handler(Looper.getMainLooper())
         handler?.postDelayed({
-            startActivity(Intent(this, MainActivity::class.java))
+            startActivity(Intent(this, PlayerActivity::class.java))
         }, 2000)
     }
 
