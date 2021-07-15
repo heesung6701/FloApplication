@@ -7,7 +7,7 @@
 
         <variable
             name="viewmodel"
-            type="com.quokkaman.floapplication.viewmodel.MusicInfoViewModel" />
+            type="com.quokkaman.floapplication.player.viewmodel.MusicInfoViewModel" />
 
     </data>
 

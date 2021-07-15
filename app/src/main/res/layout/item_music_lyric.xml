@@ -6,7 +6,7 @@
 
         <variable
             name="viewmodel"
-            type="com.quokkaman.floapplication.viewmodel.MusicLyricViewModel" />
+            type="com.quokkaman.floapplication.player.viewmodel.MusicLyricViewModel" />
 
         <import type="android.graphics.Typeface" />
     </data>

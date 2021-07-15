@@ -8,11 +8,11 @@
 
         <variable
             name="musicInfoViewModel"
-            type="com.quokkaman.floapplication.viewmodel.MusicInfoViewModel" />
+            type="com.quokkaman.floapplication.player.viewmodel.MusicInfoViewModel" />
 
         <variable
             name="musicLyricViewModel"
-            type="com.quokkaman.floapplication.viewmodel.MusicLyricViewModel" />
+            type="com.quokkaman.floapplication.player.viewmodel.MusicLyricViewModel" />
 
         <variable
             name="seekbarViewModel"

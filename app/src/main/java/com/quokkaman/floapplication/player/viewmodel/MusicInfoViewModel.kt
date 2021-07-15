@@ -1,4 +1,4 @@
-package com.quokkaman.floapplication.viewmodel
+package com.quokkaman.floapplication.player.viewmodel
 
 import android.view.View
 import androidx.lifecycle.LiveData
