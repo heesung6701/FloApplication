@@ -20,6 +20,7 @@ class MediaPlayerService : Service(), MediaPlayer.OnPreparedListener {
         const val ACTION_PAUSE = "com.quokkaman.floapplication.ACTION_PAUSE"
         const val ACTION_RELEASE = "com.quokkaman.floapplication.ACTION_RELEASE"
         const val ACTION_SEEKTO = "com.quokkaman.floapplication.ACTION_SEEKTO"
+        const val ACTION_GET_INFO = "com.quokkaman.floapplication.ACTION_GET_INFO"
 
         const val MESSAGE_MSEC = "MediaPlayerService.MESSAGE_MSEC"
         const val MESSAGE_DURATION = "MediaPlayerService.MESSAGE_DURATION"
@@ -47,7 +48,7 @@ class MediaPlayerService : Service(), MediaPlayer.OnPreparedListener {
                 releaseMedia()
             }
             ACTION_SET -> {
-                val mediaFile = intent.extras?.getString("media")
+                val mediaFile = intent.extras?.getString(ACTION_SET_BUNDLE_MEDIA)
                 if (mediaFile != null) {
                     initMediaPlayer(mediaFile)
                 }
@@ -55,6 +56,11 @@ class MediaPlayerService : Service(), MediaPlayer.OnPreparedListener {
             ACTION_SEEKTO -> {
                 val msec = intent.getIntExtra(MESSAGE_MSEC, 0)
                 seekTo(msec)
+            }
+            ACTION_GET_INFO -> {
+                mMediaPlayer?.let {
+                    sendMessage(EVENT_SET_SOURCE, MESSAGE_DURATION, it.duration)
+                }
             }
         }
         return super.onStartCommand(intent, flags, startId)

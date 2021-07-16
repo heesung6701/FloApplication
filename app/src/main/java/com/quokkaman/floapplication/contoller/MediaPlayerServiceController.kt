@@ -7,6 +7,7 @@ import android.content.IntentFilter
 import androidx.core.util.Consumer
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.quokkaman.floapplication.service.MediaPlayerService
+import com.quokkaman.floapplication.service.MediaPlayerService.Companion.ACTION_GET_INFO
 import com.quokkaman.floapplication.service.MediaPlayerService.Companion.ACTION_PAUSE
 import com.quokkaman.floapplication.service.MediaPlayerService.Companion.ACTION_PLAY
 import com.quokkaman.floapplication.service.MediaPlayerService.Companion.ACTION_RELEASE
@@ -69,7 +70,6 @@ class MediaPlayerServiceController(val context: Context) {
         LocalBroadcastManager.getInstance(context).unregisterReceiver(mMessageReceiver)
     }
 
-
     fun play() {
         context.apply {
             startService(Intent(this, MediaPlayerService::class.java).apply {
@@ -91,6 +91,14 @@ class MediaPlayerServiceController(val context: Context) {
             startService(Intent(this, MediaPlayerService::class.java).apply {
                 action = ACTION_SEEKTO
                 putExtra(MESSAGE_MSEC, progress)
+            })
+        }
+    }
+
+    fun getInfo() {
+        context.apply {
+            startService(Intent(this, MediaPlayerService::class.java).apply {
+                action = ACTION_GET_INFO
             })
         }
     }
