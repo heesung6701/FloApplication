@@ -32,7 +32,6 @@ class PlayerActivity : AppCompatActivity() {
     private lateinit var seekbarViewModel: SeekbarViewModel
     private lateinit var mediaControllerViewModel: MediaControllerViewModel
 
-    private var draggingSeekbar = false
     private var fetchedSong: Song? = null
 
     private var serviceController = MediaPlayerServiceController(this)
@@ -45,9 +44,12 @@ class PlayerActivity : AppCompatActivity() {
 
         musicInfoViewModel = ViewModelProvider(this).get(MusicInfoViewModel::class.java)
         musicLyricViewModel = ViewModelProvider(this).get(MusicLyricViewModel::class.java)
-        seekbarViewModel = ViewModelProvider(this).get(SeekbarViewModel::class.java)
-        mediaControllerViewModel =
-            ViewModelProvider(this).get(MediaControllerViewModel::class.java)
+        seekbarViewModel = ViewModelProvider(this).get(SeekbarViewModel::class.java).apply {
+            mediaPlayerServiceController = serviceController
+        }
+        mediaControllerViewModel = ViewModelProvider(this).get(MediaControllerViewModel::class.java).apply {
+            mediaPlayerServiceController = serviceController
+        }
 
         binding.musicInfoViewModel = musicInfoViewModel
         binding.musicLyricViewModel = musicLyricViewModel
@@ -56,49 +58,24 @@ class PlayerActivity : AppCompatActivity() {
         binding.lifecycleOwner = this
 
         fetchMusicInfo()
-        mediaControllerViewModel.playingLiveData.observe(this, {
-            if (it) {
-                serviceController.play()
-            } else {
-                serviceController.pause()
-            }
-        })
-        binding.itemSeekbar.seekbar.setOnSeekBarChangeListener(object :
-            SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
-                p0?.progress = p1
-            }
-
-            override fun onStartTrackingTouch(p0: SeekBar?) {
-                draggingSeekbar = true
-            }
-
-            override fun onStopTrackingTouch(p0: SeekBar?) {
-                draggingSeekbar = false
-                val seekBar = p0 ?: return
-                serviceController.seekTo(seekBar.progress)
-                mediaControllerViewModel.play()
-            }
-        })
+        binding.itemSeekbar.seekbar.setOnSeekBarChangeListener(seekbarViewModel.onSeekBarChangeListener)
 
         binding.itemLyric.root.setOnClickListener {
             val intent = Intent(this, LyricActivity::class.java)
+            intent.putExtra(Song.INTENT_KEY, fetchedSong)
             startActivity(intent)
         }
 
         serviceController.msecConsumer = Consumer { msec ->
             musicLyricViewModel.update(msec)
-            if (!draggingSeekbar) {
-                seekbarViewModel.update(msec)
-            }
+            seekbarViewModel.update(msec)
         }
 
         serviceController.durationConsumer = Consumer { duration ->
+            val song = fetchedSong ?: return@Consumer
             mediaControllerViewModel.play()
             seekbarViewModel.durationLiveData.value = duration
-            fetchedSong?.let {
-                musicLyricViewModel.updateLyricLine(it.lyricLineList, duration)
-            }
+            musicLyricViewModel.updateLyricLine(song.lyricLineList, duration)
         }
     }
 
@@ -112,7 +89,6 @@ class PlayerActivity : AppCompatActivity() {
                         val song = t?.toModel() ?: return
                         fetchedSong = song
                         musicInfoViewModel.update(song)
-
                         serviceController.setMusic(song.fileUrl)
                     }
 
