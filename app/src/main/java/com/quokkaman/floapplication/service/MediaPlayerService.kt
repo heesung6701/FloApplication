@@ -14,6 +14,8 @@ class MediaPlayerService : Service(), MediaPlayer.OnPreparedListener {
 
     companion object {
         const val ACTION_SET = "com.quokkaman.floapplication.ACTION_SET"
+        const val ACTION_SET_BUNDLE_MEDIA = "media"
+
         const val ACTION_PLAY = "com.quokkaman.floapplication.ACTION_PLAY"
         const val ACTION_PAUSE = "com.quokkaman.floapplication.ACTION_PAUSE"
         const val ACTION_RELEASE = "com.quokkaman.floapplication.ACTION_RELEASE"

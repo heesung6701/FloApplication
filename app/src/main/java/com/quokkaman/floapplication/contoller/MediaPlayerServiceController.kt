@@ -7,6 +7,16 @@ import android.content.IntentFilter
 import androidx.core.util.Consumer
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.quokkaman.floapplication.service.MediaPlayerService
+import com.quokkaman.floapplication.service.MediaPlayerService.Companion.ACTION_PAUSE
+import com.quokkaman.floapplication.service.MediaPlayerService.Companion.ACTION_PLAY
+import com.quokkaman.floapplication.service.MediaPlayerService.Companion.ACTION_RELEASE
+import com.quokkaman.floapplication.service.MediaPlayerService.Companion.ACTION_SEEKTO
+import com.quokkaman.floapplication.service.MediaPlayerService.Companion.ACTION_SET
+import com.quokkaman.floapplication.service.MediaPlayerService.Companion.ACTION_SET_BUNDLE_MEDIA
+import com.quokkaman.floapplication.service.MediaPlayerService.Companion.EVENT_MSEC
+import com.quokkaman.floapplication.service.MediaPlayerService.Companion.EVENT_SET_SOURCE
+import com.quokkaman.floapplication.service.MediaPlayerService.Companion.MESSAGE_DURATION
+import com.quokkaman.floapplication.service.MediaPlayerService.Companion.MESSAGE_MSEC
 import java.lang.Exception
 
 class MediaPlayerServiceController(val context: Context) {
@@ -16,18 +26,18 @@ class MediaPlayerServiceController(val context: Context) {
 
     private val mMessageReceiver = object : BroadcastReceiver() {
         override fun onReceive(p0: Context?, p1: Intent?) {
-            val intent = p1?:return
-            when(intent.action) {
-                MediaPlayerService.EVENT_MSEC -> {
-                    val msec = intent.getIntExtra(MediaPlayerService.MESSAGE_MSEC, 0)
+            val intent = p1 ?: return
+            when (intent.action) {
+                EVENT_MSEC -> {
+                    val msec = intent.getIntExtra(MESSAGE_MSEC, 0)
                     msecConsumer?.accept(msec)
                 }
-                MediaPlayerService.EVENT_SET_SOURCE -> {
-                    val duration = intent.getIntExtra(MediaPlayerService.MESSAGE_DURATION, 0)
+                EVENT_SET_SOURCE -> {
+                    val duration = intent.getIntExtra(MESSAGE_DURATION, 0)
                     durationConsumer?.accept(duration)
                 }
-                else ->{
-                    throw Exception(intent.action+"")
+                else -> {
+                    throw Exception(intent.action + "")
                 }
             }
         }
@@ -40,8 +50,8 @@ class MediaPlayerServiceController(val context: Context) {
                     this,
                     MediaPlayerService::class.java
                 ).apply {
-                    action = MediaPlayerService.ACTION_SET
-                    putExtra("media", fileUrl)
+                    action = ACTION_SET
+                    putExtra(ACTION_SET_BUNDLE_MEDIA, fileUrl)
                 })
         }
     }
@@ -49,21 +59,21 @@ class MediaPlayerServiceController(val context: Context) {
     fun register() {
         LocalBroadcastManager.getInstance(context).registerReceiver(
             mMessageReceiver, IntentFilter().apply {
-                addAction(MediaPlayerService.EVENT_MSEC)
-                addAction(MediaPlayerService.EVENT_SET_SOURCE)
+                addAction(EVENT_MSEC)
+                addAction(EVENT_SET_SOURCE)
             }
         )
     }
 
-    fun unregister(){
+    fun unregister() {
         LocalBroadcastManager.getInstance(context).unregisterReceiver(mMessageReceiver)
     }
 
 
     fun play() {
         context.apply {
-            startService(Intent(applicationContext, MediaPlayerService::class.java).apply {
-                action = MediaPlayerService.ACTION_PLAY
+            startService(Intent(this, MediaPlayerService::class.java).apply {
+                action = ACTION_PLAY
             })
         }
     }
@@ -71,16 +81,16 @@ class MediaPlayerServiceController(val context: Context) {
     fun pause() {
         context.apply {
             startService(Intent(this, MediaPlayerService::class.java).apply {
-                action = MediaPlayerService.ACTION_PAUSE
+                action = ACTION_PAUSE
             })
         }
     }
 
     fun seekTo(progress: Int) {
         context.apply {
-            startService(Intent(applicationContext, MediaPlayerService::class.java).apply {
-                action = MediaPlayerService.ACTION_SEEKTO
-                putExtra(MediaPlayerService.MESSAGE_MSEC, progress)
+            startService(Intent(this, MediaPlayerService::class.java).apply {
+                action = ACTION_SEEKTO
+                putExtra(MESSAGE_MSEC, progress)
             })
         }
     }
@@ -88,7 +98,7 @@ class MediaPlayerServiceController(val context: Context) {
     fun release() {
         context.apply {
             startService(Intent(this, MediaPlayerService::class.java).apply {
-                action = MediaPlayerService.ACTION_RELEASE
+                action = ACTION_RELEASE
             })
         }
     }
