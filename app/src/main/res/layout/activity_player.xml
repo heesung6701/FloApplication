@@ -12,7 +12,7 @@
 
         <variable
             name="musicLyricViewModel"
-            type="com.quokkaman.floapplication.player.viewmodel.MusicLyricViewModel" />
+            type="com.quokkaman.floapplication.player.viewmodel.MusicLyricThumbViewModel" />
 
         <variable
             name="seekbarViewModel"
@@ -47,7 +47,7 @@
 
         <include
             android:id="@+id/item_lyric"
-            layout="@layout/item_music_lyric"
+            layout="@layout/item_music_lyric_thumb"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"

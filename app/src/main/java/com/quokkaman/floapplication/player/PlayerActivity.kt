@@ -2,7 +2,6 @@ package com.quokkaman.floapplication.player
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.util.Consumer
 import androidx.lifecycle.ViewModelProvider
@@ -12,7 +11,7 @@ import com.quokkaman.floapplication.dto.SongDTO
 import com.quokkaman.floapplication.lyric.LyricActivity
 import com.quokkaman.floapplication.model.Song
 import com.quokkaman.floapplication.player.viewmodel.MusicInfoViewModel
-import com.quokkaman.floapplication.player.viewmodel.MusicLyricViewModel
+import com.quokkaman.floapplication.player.viewmodel.MusicLyricThumbViewModel
 import com.quokkaman.floapplication.repository.SongRepository
 import com.quokkaman.floapplication.viewmodel.MediaControllerViewModel
 import com.quokkaman.floapplication.viewmodel.SeekbarViewModel
@@ -28,7 +27,7 @@ class PlayerActivity : AppCompatActivity() {
     private val songRepository = SongRepository
     private val disposable = CompositeDisposable()
     private lateinit var musicInfoViewModel: MusicInfoViewModel
-    private lateinit var musicLyricViewModel: MusicLyricViewModel
+    private lateinit var musicLyricThumbViewModel: MusicLyricThumbViewModel
     private lateinit var seekbarViewModel: SeekbarViewModel
     private lateinit var mediaControllerViewModel: MediaControllerViewModel
 
@@ -43,7 +42,7 @@ class PlayerActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         musicInfoViewModel = ViewModelProvider(this).get(MusicInfoViewModel::class.java)
-        musicLyricViewModel = ViewModelProvider(this).get(MusicLyricViewModel::class.java)
+        musicLyricThumbViewModel = ViewModelProvider(this).get(MusicLyricThumbViewModel::class.java)
         seekbarViewModel = ViewModelProvider(this).get(SeekbarViewModel::class.java).apply {
             mediaPlayerServiceController = serviceController
         }
@@ -52,7 +51,7 @@ class PlayerActivity : AppCompatActivity() {
         }
 
         binding.musicInfoViewModel = musicInfoViewModel
-        binding.musicLyricViewModel = musicLyricViewModel
+        binding.musicLyricViewModel = musicLyricThumbViewModel
         binding.seekbarViewModel = seekbarViewModel
         binding.mediaControllerViewModel = mediaControllerViewModel
         binding.lifecycleOwner = this
@@ -67,7 +66,7 @@ class PlayerActivity : AppCompatActivity() {
         }
 
         serviceController.msecConsumer = Consumer { msec ->
-            musicLyricViewModel.update(msec)
+            musicLyricThumbViewModel.update(msec)
             seekbarViewModel.update(msec)
         }
 
@@ -75,7 +74,7 @@ class PlayerActivity : AppCompatActivity() {
             val song = fetchedSong ?: return@Consumer
             mediaControllerViewModel.play()
             seekbarViewModel.durationLiveData.value = duration
-            musicLyricViewModel.updateLyricLine(song.lyricLineList, duration)
+            musicLyricThumbViewModel.updateLyricLine(song.lyricLineList, duration)
         }
     }
 
