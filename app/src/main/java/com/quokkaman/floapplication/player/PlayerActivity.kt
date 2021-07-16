@@ -1,18 +1,12 @@
 package com.quokkaman.floapplication.player
 
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.os.Message
-import android.util.Log
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.util.Consumer
 import androidx.lifecycle.ViewModelProvider
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.quokkaman.floapplication.contoller.MediaPlayerServiceController
 import com.quokkaman.floapplication.databinding.ActivityPlayerBinding
 import com.quokkaman.floapplication.dto.SongDTO
 import com.quokkaman.floapplication.lyric.LyricActivity
@@ -20,15 +14,12 @@ import com.quokkaman.floapplication.model.Song
 import com.quokkaman.floapplication.player.viewmodel.MusicInfoViewModel
 import com.quokkaman.floapplication.player.viewmodel.MusicLyricViewModel
 import com.quokkaman.floapplication.repository.SongRepository
-import com.quokkaman.floapplication.service.MediaPlayerService
 import com.quokkaman.floapplication.viewmodel.MediaControllerViewModel
 import com.quokkaman.floapplication.viewmodel.SeekbarViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.DisposableSingleObserver
 import io.reactivex.schedulers.Schedulers
-import java.lang.Exception
-
 
 class PlayerActivity : AppCompatActivity() {
 
@@ -44,31 +35,7 @@ class PlayerActivity : AppCompatActivity() {
     private var draggingSeekbar = false
     private var fetchedSong: Song? = null
 
-    private val mMessageReceiver = object : BroadcastReceiver() {
-        override fun onReceive(p0: Context?, p1: Intent?) {
-            val intent = p1?:return
-            when(intent.action) {
-                MediaPlayerService.EVENT_MSEC -> {
-                    val msec = intent.getIntExtra(MediaPlayerService.MESSAGE_MSEC, 0)
-                    musicLyricViewModel.update(msec)
-                    if (!draggingSeekbar) {
-                        seekbarViewModel.update(msec)
-                    }
-                }
-                MediaPlayerService.EVENT_SET_SOURCE -> {
-                    val duration = intent.getIntExtra(MediaPlayerService.MESSAGE_DURATION, 0)
-                    mediaControllerViewModel.play()
-                    seekbarViewModel.durationLiveData.value = duration
-                    fetchedSong?.let {
-                        musicLyricViewModel.updateLyricLine(it.lyricLineList, duration)
-                    }
-                }
-                else ->{
-                    throw Exception(intent.action+"")
-                }
-            }
-        }
-    }
+    private var serviceController = MediaPlayerServiceController(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -90,14 +57,10 @@ class PlayerActivity : AppCompatActivity() {
 
         fetchMusicInfo()
         mediaControllerViewModel.playingLiveData.observe(this, {
-            if(it) {
-                startService(Intent(applicationContext, MediaPlayerService::class.java).apply {
-                    action = MediaPlayerService.ACTION_PLAY
-                })
+            if (it) {
+                serviceController.play()
             } else {
-                startService(Intent(applicationContext, MediaPlayerService::class.java).apply {
-                    action = MediaPlayerService.ACTION_PAUSE
-                })
+                serviceController.pause()
             }
         })
         binding.itemSeekbar.seekbar.setOnSeekBarChangeListener(object :
@@ -113,18 +76,29 @@ class PlayerActivity : AppCompatActivity() {
             override fun onStopTrackingTouch(p0: SeekBar?) {
                 draggingSeekbar = false
                 val seekBar = p0 ?: return
-                startService(Intent(applicationContext, MediaPlayerService::class.java).apply {
-                    action = MediaPlayerService.ACTION_SEEKTO
-                    putExtra(MediaPlayerService.MESSAGE_MSEC, seekBar.progress)
-                })
+                serviceController.seekTo(seekBar.progress)
                 mediaControllerViewModel.play()
             }
-
         })
 
         binding.itemLyric.root.setOnClickListener {
             val intent = Intent(this, LyricActivity::class.java)
             startActivity(intent)
+        }
+
+        serviceController.msecConsumer = Consumer { msec ->
+            musicLyricViewModel.update(msec)
+            if (!draggingSeekbar) {
+                seekbarViewModel.update(msec)
+            }
+        }
+
+        serviceController.durationConsumer = Consumer { duration ->
+            mediaControllerViewModel.play()
+            seekbarViewModel.durationLiveData.value = duration
+            fetchedSong?.let {
+                musicLyricViewModel.updateLyricLine(it.lyricLineList, duration)
+            }
         }
     }
 
@@ -139,14 +113,7 @@ class PlayerActivity : AppCompatActivity() {
                         fetchedSong = song
                         musicInfoViewModel.update(song)
 
-                        startService(
-                            Intent(
-                                applicationContext,
-                                MediaPlayerService::class.java
-                            ).apply {
-                                action = MediaPlayerService.ACTION_SET
-                                putExtra("media", t.file)
-                            })
+                        serviceController.setMusic(song.fileUrl)
                     }
 
                     override fun onError(e: Throwable?) {
@@ -158,24 +125,17 @@ class PlayerActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        LocalBroadcastManager.getInstance(this).registerReceiver(
-            mMessageReceiver, IntentFilter().apply {
-                addAction(MediaPlayerService.EVENT_MSEC)
-                addAction(MediaPlayerService.EVENT_SET_SOURCE)
-            }
-        )
+        serviceController.register()
     }
 
     override fun onPause() {
         super.onPause()
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver)
+        serviceController.unregister()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        startService(Intent(applicationContext, MediaPlayerService::class.java).apply {
-            action = MediaPlayerService.ACTION_RELEASE
-        })
+        serviceController.release()
         disposable.clear()
     }
 }
