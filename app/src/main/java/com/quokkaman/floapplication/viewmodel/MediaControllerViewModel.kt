@@ -1,8 +1,8 @@
 package com.quokkaman.floapplication.viewmodel
 
-import android.media.MediaPlayer
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.quokkaman.floapplication.contoller.MediaPlayerServiceController
 
 class MediaControllerViewModel : ViewModel() {
 
@@ -20,18 +20,20 @@ class MediaControllerViewModel : ViewModel() {
     val playingLiveData = MutableLiveData(false)
     val repeatLivaData = MutableLiveData(RepeatType.REPEAT_TYPE_NONE)
     val shuffleLiveData = MutableLiveData(false)
-    var mediaPlayer: MediaPlayer? = null
+
+
+    lateinit var mediaPlayerServiceController: MediaPlayerServiceController
 
     fun play() {
         if (playingLiveData.value == true) return
         playingLiveData.value = true
-        mediaPlayer?.start()
+        mediaPlayerServiceController.play()
     }
 
     fun pause() {
         if (playingLiveData.value == false) return
         playingLiveData.value = false
-        mediaPlayer?.pause()
+        mediaPlayerServiceController.pause()
     }
 
     fun toggleShuffle() {
@@ -40,7 +42,7 @@ class MediaControllerViewModel : ViewModel() {
 
     fun toggleRepeat() {
         repeatLivaData.value = repeatLivaData.value?.next() ?: RepeatType.REPEAT_TYPE_NONE
-        mediaPlayer?.isLooping = repeatLivaData.value == RepeatType.REPEAT_TYPE_ONE
+//        mediaPlayer?.isLooping = repeatLivaData.value == RepeatType.REPEAT_TYPE_ONE
     }
 
     fun prevMusic() {
