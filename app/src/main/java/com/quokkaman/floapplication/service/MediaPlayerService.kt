@@ -158,10 +158,12 @@ class MediaPlayerService : Service(), MediaPlayer.OnPreparedListener {
 
         override fun run() {
             while (isPlaying) {
-                val msec = mMediaPlayer?.currentPosition ?: continue
-                if (recent == msec) continue
-                recent = msec
-                sendMessage(EVENT_MSEC, MESSAGE_MSEC, msec)
+                if(mMediaPlayer?.isPlaying == true) {
+                    val msec = mMediaPlayer?.currentPosition ?: continue
+                    if (recent == msec) continue
+                    recent = msec
+                    sendMessage(EVENT_MSEC, MESSAGE_MSEC, msec)
+                }
             }
         }
     }
