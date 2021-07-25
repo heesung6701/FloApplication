@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".player.LyricActivity">
+
+    <data>
+
+        <variable
+            name="lyricViewModel"
+            type="com.quokkaman.floapplication.lyric.viewmodel.MusicLyricViewModel" />
+
+        <variable
+            name="seekbarViewModel"
+            type="com.quokkaman.floapplication.viewmodel.SeekbarViewModel" />
+
+        <variable
+            name="mediaControllerViewModel"
+            type="com.quokkaman.floapplication.viewmodel.MediaControllerViewModel" />
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <include
+            android:id="@+id/item_lyric"
+            layout="@layout/item_music_lyric"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_margin="8dp"
+            app:viewmodel="@{lyricViewModel}" />
+
+        <include
+            android:id="@+id/item_seekbar"
+            layout="@layout/item_seekbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            app:viewmodel="@{seekbarViewModel}" />
+
+        <include
+            layout="@layout/item_media_controller"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:viewmodel="@{mediaControllerViewModel}" />
+    </LinearLayout>
+</layout>

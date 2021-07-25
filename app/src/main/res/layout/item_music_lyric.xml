@@ -6,37 +6,12 @@
 
         <variable
             name="viewmodel"
-            type="com.quokkaman.floapplication.player.viewmodel.MusicLyricViewModel" />
+            type="com.quokkaman.floapplication.lyric.viewmodel.MusicLyricViewModel" />
 
         <import type="android.graphics.Typeface" />
     </data>
 
-    <LinearLayout
+    <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:text="@{viewmodel.lyric1LiveData}"
-            android:textSize="16sp"
-            android:typeface="@{Typeface.defaultFromStyle(viewmodel.lyric1playingLiveData ? Typeface.BOLD : Typeface.NORMAL)}"
-            tools:text="채워줄게 가득히 one shots"
-            tools:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/tv_singer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:text="@{viewmodel.lyric2LiveData}"
-            android:textSize="16sp"
-            android:typeface="@{Typeface.defaultFromStyle(viewmodel.lyric2playingLiveData ? Typeface.BOLD : Typeface.NORMAL)}"
-            tools:text="잔을 위로 come on 머리 위로 come on" />
-    </LinearLayout>
+        android:layout_height="match_parent"/>
 </layout>
