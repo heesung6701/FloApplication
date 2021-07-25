@@ -4,9 +4,11 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.util.Consumer
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.quokkaman.floapplication.R
 import com.quokkaman.floapplication.contoller.MediaPlayerServiceController
 import com.quokkaman.floapplication.databinding.ActivityLyricBinding
+import com.quokkaman.floapplication.lyric.adapter.LyricLineAdapter
 import com.quokkaman.floapplication.model.Song
 import com.quokkaman.floapplication.viewmodel.MediaControllerViewModel
 import com.quokkaman.floapplication.viewmodel.SeekbarViewModel
@@ -20,16 +22,19 @@ class LyricActivity : AppCompatActivity() {
 
     private var serviceController = MediaPlayerServiceController(this)
 
+    private var lyricLineAdapter = LyricLineAdapter()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityLyricBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val song: Song? = intent.getParcelableExtra(Song.INTENT_KEY)
-        if (song == null) {
+        if(!intent.hasExtra(Song.INTENT_KEY)) {
             finish()
+            return
         }
+        val song: Song = intent.getParcelableExtra(Song.INTENT_KEY)!!
 
         seekbarViewModel = ViewModelProvider(this).get(SeekbarViewModel::class.java).apply {
             mediaPlayerServiceController = serviceController
@@ -43,7 +48,9 @@ class LyricActivity : AppCompatActivity() {
         binding.mediaControllerViewModel = mediaControllerViewModel
         binding.lifecycleOwner = this
         binding.itemSeekbar.seekbar.setOnSeekBarChangeListener(seekbarViewModel.onSeekBarChangeListener)
-
+        binding.itemLyric.recyclerView.layoutManager = LinearLayoutManager(this)
+        binding.itemLyric.recyclerView.adapter = lyricLineAdapter
+        lyricLineAdapter.submitList(song.lyricLineList)
 
         serviceController.msecConsumer = Consumer { msec ->
             seekbarViewModel.update(msec)
