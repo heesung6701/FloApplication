@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.util.Consumer
 import androidx.lifecycle.ViewModelProvider
+import com.quokkaman.floapplication.R
 import com.quokkaman.floapplication.contoller.MediaPlayerServiceController
 import com.quokkaman.floapplication.databinding.ActivityPlayerBinding
 import com.quokkaman.floapplication.dto.SongDTO
@@ -63,6 +64,7 @@ class PlayerActivity : AppCompatActivity() {
             val intent = Intent(this, LyricActivity::class.java)
             intent.putExtra(Song.INTENT_KEY, fetchedSong)
             startActivity(intent)
+            overridePendingTransition(R.anim.slide_up_enter, R.anim.nothing)
         }
 
         serviceController.msecConsumer = Consumer { msec ->
